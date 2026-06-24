@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Пентестер — Этика Безопасности</title>
+    <style>
+        :root {
+            --bg-dark: #0a0e1a;
+            --bg-card: #0f1424;
+            --accent: #4dabf7;
+            --accent-dim: #339af0;
+            --text: #e0e0e0;
+            --text-dim: #888;
+            --border: #1a2040;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        /* Hero */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+            background: var(--bg-dark);
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background:
+                radial-gradient(ellipse at 30% 20%, rgba(77, 171, 247, 0.12) 0%, transparent 50%),
+                radial-gradient(ellipse at 70% 80%, rgba(51, 154, 240, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(77, 171, 247, 0.05) 0%, transparent 40%);
+            animation: heroGlow 8s ease-in-out infinite alternate;
+            pointer-events: none;
+        }
+
+        @keyframes heroGlow {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(-3%, 3%) scale(1.05); }
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(77, 171, 247, 0.04) 40px),
+                repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(77, 171, 247, 0.04) 40px);
+            pointer-events: none;
+            mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
+            -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
+        }
+
+        .hero-content {
+            max-width: 900px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin-bottom: 1.5rem;
+            padding: 0.5rem 1.2rem;
+            background: rgba(77, 171, 247, 0.06);
+            border: 1px solid rgba(77, 171, 247, 0.15);
+            border-radius: 100px;
+        }
+
+        .hero-label::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--accent);
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(77, 171, 247, 0.4); }
+            50% { opacity: 0.7; box-shadow: 0 0 0 8px rgba(77, 171, 247, 0); }
+        }
+
+        .hero h1 {
+            font-size: clamp(3rem, 7vw, 5.5rem);
+            font-weight: 900;
+            letter-spacing: -3px;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            color: var(--text);
+        }
+
+        .hero h1 .line-sub {
+            display: block;
+            font-size: 0.4em;
+            font-weight: 400;
+            letter-spacing: 0;
+            color: var(--text-dim);
+            margin-top: 0.5rem;
+            line-height: 1.5;
+        }
+
+        .hero h1 .accent {
+            background: linear-gradient(135deg, #4dabf7 0%, #74c0fc 50%, #339af0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+        }
+
+        .hero h1 .accent::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            border-radius: 2px;
+        }
+
+        .hero-desc {
+            font-size: 1.15rem;
+            color: var(--text-dim);
+            max-width: 620px;
+            margin: 0 auto 2.5rem;
+            line-height: 1.8;
+        }
+
+        .hero-terminal {
+            display: inline-flex;
+            align-items: center;
+            gap: 1rem;
+            font-family: 'Courier New', monospace;
+            background: rgba(15, 20, 36, 0.8);
+            border: 1px solid rgba(77, 171, 247, 0.2);
+            padding: 0.9rem 1.8rem;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            color: var(--accent);
+            backdrop-filter: blur(10px);
+        }
+
+        .hero-terminal .prompt {
+            color: #74c0fc;
+        }
+
+        .hero-terminal .cmd {
+            color: var(--accent);
+        }
+
+        .hero-terminal .cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1.1em;
+            background: var(--accent);
+            margin-left: 2px;
+            animation: cursorBlink 1s step-end infinite;
+            vertical-align: middle;
+        }
+
+        @keyframes cursorBlink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .hero-stat {
+            text-align: center;
+        }
+
+        .hero-stat .num {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--accent);
+            line-height: 1;
+        }
+
+        .hero-stat .label {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            margin-top: 0.3rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Sections */
+        section {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 5rem 2rem;
+        }
+
+        .section-label {
+            display: inline-block;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 1rem;
+            background: rgba(77, 171, 247, 0.08);
+            padding: 0.3rem 0.8rem;
+            border-radius: 4px;
+        }
+
+        h2 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            letter-spacing: -1px;
+        }
+
+        h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--accent);
+        }
+
+        /* Cards Grid */
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            transition: border-color 0.3s, transform 0.3s;
+        }
+
+        .card:hover {
+            border-color: rgba(77, 171, 247, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .card-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .card p {
+            color: var(--text-dim);
+            font-size: 0.95rem;
+        }
+
+        /* Tools List */
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .tool-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: border-color 0.3s;
+        }
+
+        .tool-item:hover {
+            border-color: var(--accent-dim);
+        }
+
+        .tool-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--accent);
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .tool-item .name {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .tool-item .desc {
+            color: var(--text-dim);
+            font-size: 0.82rem;
+        }
+
+        /* Skills */
+        .skills-list {
+            margin-top: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .skill-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.5rem;
+        }
+
+        .skill-num {
+            font-family: 'Courier New', monospace;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--accent);
+            min-width: 2.5rem;
+        }
+
+        .skill-row h4 {
+            font-size: 1.05rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .skill-row p {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+
+        /* Advantages */
+        .advantages-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .advantage {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            border-left: 3px solid var(--accent);
+        }
+
+        .advantage h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .advantage p {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+
+        /* Kali section */
+        .kali-hero {
+            display: flex;
+            gap: 2.5rem;
+            align-items: center;
+            margin-top: 2rem;
+        }
+
+        .kali-text {
+            flex: 1;
+        }
+
+        .kali-text p {
+            color: var(--text-dim);
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .kali-logo {
+            flex-shrink: 0;
+            width: 160px;
+            height: 160px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .kali-logo::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at center, rgba(77, 171, 247, 0.15) 0%, transparent 70%);
+        }
+
+        .kali-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .kali-feature {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.25rem;
+        }
+
+        .kali-feature h4 {
+            font-size: 1rem;
+            margin-bottom: 0.4rem;
+            color: var(--accent);
+        }
+
+        .kali-feature p {
+            color: var(--text-dim);
+            font-size: 0.88rem;
+        }
+
+        /* CTA */
+        .cta {
+            text-align: center;
+            padding: 5rem 2rem;
+        }
+
+        .cta h2 {
+            margin-bottom: 1rem;
+        }
+
+        .cta p {
+            color: var(--text-dim);
+            max-width: 500px;
+            margin: 0 auto 2rem;
+            font-size: 1.1rem;
+        }
+
+        .cta-btn {
+            display: inline-block;
+            background: var(--accent);
+            color: var(--bg-dark);
+            font-weight: 700;
+            padding: 0.9rem 2.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: opacity 0.3s;
+        }
+
+        .cta-btn:hover {
+            opacity: 0.85;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-dim);
+            font-size: 0.8rem;
+            border-top: 1px solid var(--border);
+        }
+
+        /* Divider */
+        .divider {
+            max-width: 1100px;
+            margin: 0 auto;
+            height: 1px;
+            background: var(--border);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-dark); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+        /* Animation */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s, transform 0.6s;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Nav */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            padding: 1rem 2rem;
+            background: rgba(10, 14, 26, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: 'Courier New', monospace;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--accent);
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 2rem;
+        }
+
+        nav a {
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+        }
+
+        nav a:hover {
+            color: var(--accent);
+        }
+
+        @media (max-width: 768px) {
+            nav ul { display: none; }
+            .cards { grid-template-columns: 1fr; }
+            .advantages-grid { grid-template-columns: 1fr; }
+            .tools-grid { grid-template-columns: 1fr 1fr; }
+            .kali-hero { flex-direction: column; text-align: center; }
+            .kali-logo { margin: 0 auto; }
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="logo">pentester://</div>
+    <ul>
+        <li><a href="#about">О профессии</a></li>
+        <li><a href="#skills">Навыки</a></li>
+        <li><a href="#kali">Kali Linux</a></li>
+        <li><a href="#tools">Инструменты</a></li>
+        <li><a href="#advantages">Преимущества</a></li>
+    </ul>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+    <div class="hero-content fade-in">
+        <div class="hero-label">
+            <span>// ethical hacking</span>
+        </div>
+        <h1>
+            Профессия
+            <span class="accent">Пентестер</span>
+            <span class="line-sub">Специалист по тестированию на проникновение — белый хакер,<br>который защищает компании, находя уязвимости раньше злоумышленников</span>
+        </h1>
+        <div class="hero-terminal">
+            <span class="prompt">root@kali:~$</span>
+            <span class="cmd">nmap -sV target.com</span>
+            <span class="cursor"></span>
+        </div>
+        <div class="hero-stats">
+            <div class="hero-stat">
+                <div class="num">600+</div>
+                <div class="label">инструментов</div>
+            </div>
+            <div class="hero-stat">
+                <div class="num">0day</div>
+                <div class="label">исследования</div>
+            </div>
+            <div class="hero-stat">
+                <div class="num">∞</div>
+                <div class="label">возможностей</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- About -->
+<section id="about">
+    <div class="fade-in">
+        <div class="section-label">// 01 — о профессии</div>
+        <h2>Чем занимается пентестер</h2>
+        <p style="color: var(--text-dim); max-width: 700px; font-size: 1.05rem; margin-bottom: 2rem;">
+            Пентестер (тестер на проникновение) имитирует атаки на IT-инфраструктуру компании, чтобы выявить уязвимости до того, как их найдут реальные злоумышленники. Это легальная и высокооплачиваемая профессия в сфере информационной безопасности.
+        </p>
+
+        <div class="cards">
+            <div class="card fade-in">
+                <div class="card-icon">🔍</div>
+                <h3>Разведка</h3>
+                <p>Сбор информации о цели: домены, IP-адреса, технологии, сотрудники. OSINT-исследование перед началом атаки.</p>
+            </div>
+            <div class="card fade-in">
+                <div class="card-icon">🛡️</div>
+                <h3>Сканирование</h3>
+                <p>Поиск открытых портов, служб и известных уязвимостей. Автоматизированные и ручные техники анализа.</p>
+            </div>
+            <div class="card fade-in">
+                <div class="card-icon">💥</div>
+                <h3>Эксплуатация</h3>
+                <p>Попытка использования найденных уязвимостей для получения несанкционированного доступа к системе.</p>
+            </div>
+            <div class="card fade-in">
+                <div class="card-icon">📊</div>
+                <h3>Отчётность</h3>
+                <p>Документирование всех найденных уязвимостей, их критичности и рекомендаций по устранению для заказчика.</p>
+            </div>
+            <div class="card fade-in">
+                <div class="card-icon">🏗️</div>
+                <h3>Пост-эксплуатация</h3>
+                <p>Оценка реального влияния: что злоумышленник мог бы украсть, скомпрометировать или уничтожить.</p>
+            </div>
+            <div class="card fade-in">
+                <div class="card-icon">📋</div>
+                <h3>Консалтинг</h3>
+                <p>Рекомендации по улучшению безопасности, помощь командам разработки и DevSecOps в построении защищённого процесса.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Skills -->
+<section id="skills">
+    <div class="fade-in">
+        <div class="section-label">// 02 — навыки</div>
+        <h2>Что должен уметь пентестер</h2>
+
+        <div class="skills-list">
+            <div class="skill-row fade-in">
+                <div class="skill-num">01</div>
+                <div>
+                    <h4>Сетевые протоколы и архитектура</h4>
+                    <p>TCP/IP, DNS, HTTP/HTTPS, ARP — понимание работы сети на всех уровнях OSI. Умение анализировать трафик и находить аномалии.</p>
+                </div>
+            </div>
+            <div class="skill-row fade-in">
+                <div class="skill-num">02</div>
+                <div>
+                    <h4>Операционные системы</h4>
+                    <p>Глубокое знание Linux (Kali, Parrot) и Windows. Понимание файловых систем, прав доступа, сервисов и механизмов защиты ОС.</p>
+                </div>
+            </div>
+            <div class="skill-row fade-in">
+                <div class="skill-num">03</div>
+                <div>
+                    <h4>Программирование и скриптинг</h4>
+                    <p>Python, Bash, PowerShell — для автоматизации, создания эксплойтов и написания кастомных инструментов. Понимание C/C++ для анализа бинарников.</p>
+                </div>
+            </div>
+            <div class="skill-row fade-in">
+                <div class="skill-num">04</div>
+                <div>
+                    <h4>Веб-безопасность</h4>
+                    <p>OWASP Top 10: SQL-инъекции, XSS, CSRF, SSRF, XXE, уязвимости аутентификации. Тестирование REST API и GraphQL.</p>
+                </div>
+            </div>
+            <div class="skill-row fade-in">
+                <div class="skill-num">05</div>
+                <div>
+                    <h4>Криптография</h4>
+                    <p>Понимание шифрования, хеш-функций, PKI, SSL/TLS. Умение выявлять криптографические ошибки в реализациях.</p>
+                </div>
+            </div>
+            <div class="skill-row fade-in">
+                <div class="skill-num">06</div>
+                <div>
+                    <h4>Социальная инженерия</h4>
+                    <p>Проведение фишинговых атак, физический пентест. Понимание человеческой психологии и методов манипуляции.</p>
+                </div>
+            </div>
+            <div class="skill-row fade-in">
+                <div class="skill-num">07</div>
+                <div>
+                    <h4>Мобильная безопасность</h4>
+                    <p>Анализ Android (APK) и iOS приложений. Reverse engineering, обход защиты, проверка хранения данных.</p>
+                </div>
+            </div>
+            <div class="skill-row fade-in">
+                <div class="skill-num">08</div>
+                <div>
+                    <h4>Документация и коммуникация</h4>
+                    <p>Умение清晰писать технические отчёты для руководства и разработчиков. Донести риски бизнесу на понятном языке.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Kali Linux -->
+<section id="kali">
+    <div class="fade-in">
+        <div class="section-label">// 03 — kali linux</div>
+        <h2>Kali Linux — оружие пентестера</h2>
+
+        <div class="kali-hero">
+            <div class="kali-text">
+                <p>
+                    Kali Linux — дистрибутив Linux, разработанный Offensive Security специально для тестирования на проникновение, анализа безопасности и цифровой forensic. Это де-факто стандарт индустрии.
+                </p>
+                <p>
+                    Основан на Debian, поставляется с более чем 600 предустановленными инструментами для пентестинга, segurança аудита, исследования уязвимостей и реверс-инжиниринга.
+                </p>
+            </div>
+            <div class="kali-logo">🐉</div>
+        </div>
+
+        <div class="kali-features">
+            <div class="kali-feature fade-in">
+                <h4>600+ инструментов</h4>
+                <p>Nmap, Metasploit, Burp Suite, John the Ripper, Aircrack-ng, Wireshark — всё предустановлено и готово к работе.</p>
+            </div>
+            <div class="kali-feature fade-in">
+                <h4>Работа с ARM</h4>
+                <p>Поддержка Raspberry Pi, BeagleBone, Android — можно запускать на мини-компьютерах и мобильных устройствах.</p>
+            </div>
+            <div class="kali-feature fade-in">
+                <h4>Бесплатный и открытый</h4>
+                <p>Полностью бесплатный дистрибутив с открытым исходным кодом. Множество обновлений и патчей от сообщества.</p>
+            </div>
+            <div class="kali-feature fade-in">
+                <h4>Мультиязычный</h4>
+                <p>Поддержка более 60 языков, включая русский. Удобный图形化的 установщик для настройки под себя.</p>
+            </div>
+            <div class="kali-feature fade-in">
+                <h4>Облачные и виртуальные среды</h4>
+                <p>Готовые образы для VMware, VirtualBox, AWS, Azure. Быстрый запуск без установки на физическое железо.</p>
+            </div>
+            <div class="kali-feature fade-in">
+                <h4>Kali NetHunter</h4>
+                <p>Платформа для тестирования безопасности мобильных устройств. Устанавливается на Android-смартфоны для пентестинга с мобильного.</p>
+            </div>
+            <div class="kali-feature fade-in">
+                <h4>Rolling Release</h4>
+                <p>Постоянные обновления пакетов без переустановки системы. Всегда свежие версии инструментов и ядра.</p>
+            </div>
+            <div class="kali-feature fade-in">
+                <h4>Совместимость с Windows</h4>
+                <p>Kali под WSL (Windows Subsystem for Linux) позволяет использовать инструменты Kali прямо в Windows без dual-boot.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Tools -->
+<section id="tools">
+    <div class="fade-in">
+        <div class="section-label">// 04 — инструменты</div>
+        <h2>Ключевые инструменты пентестера</h2>
+        <p style="color: var(--text-dim); max-width: 650px; margin-bottom: 1rem;">
+            Вот основные утилиты, которые использует каждый пентестер в повседневной работе:
+        </p>
+
+        <div class="tools-grid">
+            <div class="tool-item fade-in">
+                <div class="tool-dot"></div>
+                <div>
+                    <div class="name">Nmap</div>
+                    <div class="desc">Сканирование сетей и портов</div>
+                </div>
+            </div>
+            <div class="tool-item fade-in">
+                <div class="tool-dot"></div>
+                <div>
+                    <div class="name">Burp Suite</div>
+                    <div class="desc">Анализ веб-трафика, прокси</div>
+                </div>
+            </div>
+            <div class="tool-item fade-in">
+                <div class="tool-dot"></div>
+                <div>
+                    <div class="name">Metasploit</div>
+                    <div class="desc">Фреймворк эксплуатации</div>
+                </div>
+            </div>
+            <div class="tool-item fade-in">
+                <div class="tool-dot"></div>
+                <div>
+                    <div class="name">Wireshark</div>
+                    <div class="desc">Анализ сетевого трафика</div>
+                </div>
+            </div>
+            <div class="tool-item fade-in">
+                <div class="tool-dot"></div>
+                <div>
+                    <div class="name">SQLMap</div>
+                    <div class="desc">Автоматизация SQL-инъекций</div>
+                </div>
+            </div>
+            <div class="tool-item fade-in">
+                <div class="tool-dot"></div>
+                <div>
+                    <div class="name">John the Ripper</div>
+                    <div class="desc">Взлом хешей паролей</div>
+                </div>
+            </div>
+            <div class="tool-item fade-in">
+                <div class="tool-dot"></div>
+                <div>
+                    <div class="name">Hydra</div>
+                    <div class="desc">Брутфорс аутентификации</div>
+                </div>
+            </div>
+            <div class="tool-item fade-in">
+                <div class="tool-dot"></div>
+                <div>
+                    <div class="name">Ghidra</div>
+                    <div class="desc">Reverse engineering бинарников</div>
+                </div>
+            </div>
+            <div class="tool-item fade-in">
+                <div class="tool-dot"></div>
+                <div>
+                    <div class="name">OWASP ZAP</div>
+                    <div class="desc">Тестирование веб-приложений</div>
+                </div>
+            </div>
+            <div class="tool-item fade-in">
+                <div class="tool-dot"></div>
+                <div>
+                    <div class="name">Nikto</div>
+                    <div class="desc">Сканер веб-серверов</div>
+                </div>
+            </div>
+            <div class="tool-item fade-in">
+                <div class="tool-dot"></div>
+                <div>
+                    <div class="name">Aircrack-ng</div>
+                    <div class="desc">Анализ беспроводных сетей</div>
+                </div>
+            </div>
+            <div class="tool-item fade-in">
+                <div class="tool-dot"></div>
+                <div>
+                    <div class="name">Hashcat</div>
+                    <div class="desc">GPU-ускоренный взлом хешей</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Advantages -->
+<section id="advantages">
+    <div class="fade-in">
+        <div class="section-label">// 05 — преимущества</div>
+        <h2>Почему стоит стать пентестером</h2>
+
+        <div class="advantages-grid">
+            <div class="advantage fade-in">
+                <h3>Высокая зарплата</h3>
+                <p>Средняя зарплата пентестера в России — от 200 000 до 500 000 рублей в месяц. За рубежом — от $80 000 до $150 000 в год. Опытные специалисты зарабатывают ещё больше.</p>
+            </div>
+            <div class="advantage fade-in">
+                <h3>Удалённая работа</h3>
+                <p>Пентестинг — одна из самых удалённо-дружных профессий. Работайте из любой точки мира с ноутбуком и стабильным интернетом.</p>
+            </div>
+            <div class="advantage fade-in">
+                <h3>Растущий спрос</h3>
+                <p>Рынок кибербезопасности растёт на 12-15% ежегодно. Каждая компания нуждается в специалистах по безопасности.</p>
+            </div>
+            <div class="advantage fade-in">
+                <h3>Постоянное обучение</h3>
+                <p>Каждый проект — новая задача. Вы никогда не будете скучать: новые уязвимости, технологии и методы атак.</p>
+            </div>
+            <div class="advantage fade-in">
+                <h3>Сертификации</h3>
+                <p>CEH, OSCP, GPEN, PNPT — престижные сертификации повышают ваш авторитет и доход. Многие оплачиваются работодателем.</p>
+            </div>
+            <div class="advantage fade-in">
+                <h3>Легальность и этика</h3>
+                <p>Вы защищаете людей и компании, а не причиняете вред. Работа с разрешения заказчика, полная юридическая защищённость.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="cta fade-in">
+    <h2>Готов начать?</h2>
+    <p>Путь в кибербезопасность начинается с первого шага. Изучай, практикуйся, сертифицируйся.</p>
+    <a href="#about" class="cta-btn">Узнать больше</a>
+</section>
+
+<footer>
+    <p>Pentester // Ethical Hacking — Summer School 2025</p>
+</footer>
+
+<script>
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+    // Smooth scroll
+    document.querySelectorAll('nav a').forEach(a => {
+        a.addEventListener('click', e => {
+            e.preventDefault();
+            const target = document.querySelector(a.getAttribute('href'));
+            if (target) target.scrollIntoView({ behavior: 'smooth' });
+        });
+    });
+</script>
+
+</body>
+</html>
